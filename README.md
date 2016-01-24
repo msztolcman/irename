@@ -14,7 +14,7 @@ or `$VISUAL` if the former is empty. If neither of them aren't set, use `vim`.
 Current stable version
 ----------------------
 
-0.1.0
+1.0.0
 
 Python version
 --------------
@@ -68,21 +68,21 @@ Simplest way is to use Python's built-in package system:
   
 3. Using sources
 
-Download sources from [Github](https://github.com/msztolcman/irename/archive/0.1.0.zip):
+Download sources from [Github](https://github.com/msztolcman/irename/archive/1.0.0.zip):
 
-    wget -O 0.1.0.zip https://github.com/msztolcman/irename/archive/0.1.0.zip
+    wget -O 1.0.0.zip https://github.com/msztolcman/irename/archive/1.0.0.zip
     
 or
 
-    curl -o 0.1.0.zip https://github.com/msztolcman/irename/archive/0.1.0.zip
+    curl -o 1.0.0.zip https://github.com/msztolcman/irename/archive/1.0.0.zip
 
 Unpack:
 
-    unzip 0.1.0.zip
+    unzip 1.0.0.zip
 
 And install
 
-    cd irename-0.1.0
+    cd irename-1.0.0
     python3 setup.py install
 
 Voila!

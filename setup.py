@@ -25,7 +25,7 @@ with open(path.join(BASE_DIR, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='irename',
-    version='0.1.0',
+    version='1.0.0',
     description='interactive rename files using favorite editoror',
     long_description=long_description,
     url='http://msztolcman.github.io/irename/',
