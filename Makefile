@@ -15,3 +15,6 @@ upload:
 	twine upload dist/irename*
 
 distro: clean build upload
+
+register:
+	python setup.py register
