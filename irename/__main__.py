@@ -1,5 +1,6 @@
 import argparse
 import atexit
+import configparser
 import glob
 import os
 import shlex
@@ -11,6 +12,9 @@ import tempfile
 from irename import __version__ as version
 
 TMP_FILE_PATH = None
+CONFIG_FILE_PATH = os.path.expanduser('~/.irename.rc')
+DEFAULT_EDITOR = 'vim'
+DEFAULT_EDITOR_ARGUMENTS = ''
 
 def cleanup():
     if not TMP_FILE_PATH:
@@ -23,8 +27,42 @@ def cleanup():
 atexit.register(cleanup)
 
 
-def get_default_editor():
-    return os.environ.get('EDITOR', os.environ.get('VISUAL', 'vim'))
+class ConfigError(Exception):
+    pass
+
+
+class Config:
+    def __init__(self):
+        self._data = {}
+
+    def set(self, key, value):
+        self._data[key] = value
+
+    def get(self, key, default=None):
+        return self._data.get(key, default)
+
+
+def get_config(path):
+    data = configparser.ConfigParser()
+    read = data.read(path)
+
+    cfg = Config()
+    cfg.set('editor', os.environ.get('EDITOR', os.environ.get('VISUAL', 'vim')))
+    cfg.set('editor_arguments', '')
+    cfg.set('force', False)
+    cfg.set('interactive', False)
+    cfg.set('verbose', False)
+
+    if not read:
+        return cfg
+
+    if 'irename' not in data:
+        raise ConfigError("Missing 'irename' section in config file")
+
+    for key in data['irename']:
+        cfg.set(key, data['irename'][key])
+
+    return cfg
 
 
 def parse_args(argv, defaults=None):
@@ -34,13 +72,13 @@ def parse_args(argv, defaults=None):
     p = argparse.ArgumentParser()
     p.add_argument('--editor', '-e', type=str, default=defaults.get('editor'),
         help='Change default editor')
-    p.add_argument('--editor-arguments', '-c', type=str, default='', metavar='ARGUMENTS',
+    p.add_argument('--editor-arguments', '-c', type=str, default=defaults.get('editor-arguments'), metavar='ARGUMENTS',
         help='Pass additional arguments to editor')
-    p.add_argument('--verbose', '-v', action='store_true',
+    p.add_argument('--verbose', '-v', action='store_true', default=defaults.get('verbose'),
         help='Be verbose')
-    p.add_argument('--interactive', '-i', action='store_true',
+    p.add_argument('--interactive', '-i', action='store_true', default=defaults.get('interactive'),
         help='Ask before every rename')
-    p.add_argument('--force', '-f', action='store_true',
+    p.add_argument('--force', '-f', action='store_true', default=defaults.get('force'),
         help='Do not ask if destination file already exists')
     p.add_argument('files', type=str, nargs='*',
         help='files to rename')
@@ -62,10 +100,8 @@ def parse_args(argv, defaults=None):
 def main():
     global TMP_FILE_PATH
 
-    defaults = {
-        'editor': get_default_editor(),
-    }
-    args = parse_args(sys.argv[1:], defaults)
+    config = get_config(CONFIG_FILE_PATH)
+    args = parse_args(sys.argv[1:], config)
 
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as fh:
         TMP_FILE_PATH = fh.name
